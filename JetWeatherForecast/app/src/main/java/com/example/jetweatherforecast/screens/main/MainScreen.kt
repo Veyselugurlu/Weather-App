@@ -1,11 +1,10 @@
 package com.example.jetweatherforecast.screens.main
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,47 +14,53 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
-import com.example.jetweatherforecast.R
 import com.example.jetweatherforecast.data.DataOrException
 import com.example.jetweatherforecast.model.Weather
 import com.example.jetweatherforecast.model.WeatherItem
+import com.example.jetweatherforecast.navigation.WeatherScreens
 import com.example.jetweatherforecast.screens.MainViewModel
+import com.example.jetweatherforecast.widgets.HumidityWindPressureRow
+import com.example.jetweatherforecast.widgets.SunsetSunRiseNow
 import com.example.jetweatherforecast.widgets.WeatherAppBar
+import com.example.jetweatherforecast.widgets.WeatherItemDetailsRow
+import com.example.jetweatherforecast.widgets.WeatherStateImage
 import formatDate
-import formatDateTime
 import formatDecimals
 
 @Composable
-fun MainScreen(navController: NavController,
-               mainViewModel: MainViewModel = hiltViewModel()){
+fun MainScreen(
+    navController: NavController,
+    mainViewModel: MainViewModel = hiltViewModel(),
+    city: String?,
+    ){
+    Log.d("TAG","MainScreen: $city")
+    LaunchedEffect(city) {
+        Log.d("TAGG", "LaunchedEffect çalıştı, şehir: $city")
+    }
 
     val weatherData = produceState<DataOrException<Weather,Boolean,Exception>>(
-        initialValue = DataOrException(loading = true)) {
-        value = mainViewModel.getWeatherData(city = "Moscow")
+        initialValue = DataOrException(loading = true),
+        key1 = city
+    ) {
+        value = mainViewModel.getWeatherData(city = city.toString())
     }.value
 
     if (weatherData.loading == true){
@@ -74,12 +79,16 @@ fun MainScaffold(weather: Weather, navController: NavController) {
             WeatherAppBar(
                 title = "${weather.city.name}, ${weather.city.country}",
                 navController = navController,
+                isMainScreen = true,
+                onAddActionClicked = {
+                    navController.navigate(
+                        WeatherScreens.SearchScreen.name)
+                },
                 elevation = 5.dp
             )
         }
     ) { paddingValues ->
         MainContent(data = weather)
-
     }
 }
 
@@ -124,7 +133,7 @@ fun MainContent(data: Weather) {
 
         Text("This Week",
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight =FontWeight.Bold)
+            fontWeight = FontWeight.Bold)
 
         Surface(modifier = Modifier
             .padding(5.dp)
@@ -137,124 +146,8 @@ fun MainContent(data: Weather) {
                     contentPadding = PaddingValues(1.dp)) {
                     items(items = data.list) {item: WeatherItem ->
                         WeatherItemDetailsRow(weather = item)
-
                     }
                 }
             }
     }
-
 }
-
-@Composable
-fun WeatherItemDetailsRow(weather: WeatherItem) {
-    val imageUrl = "https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png"
-    Surface(modifier = Modifier
-        .padding(2.dp)
-        .fillMaxWidth(),
-        shape = CircleShape.copy(topEnd = CornerSize(6.dp), bottomStart = CornerSize(6.dp)),
-        color = Color.White) {
-        Row(modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween) {
-
-            Text(formatDate(weather.dt).split(",")[0],
-                modifier = Modifier.padding(start = 5.dp)
-                )
-
-            WeatherStateImage(imageUrl=imageUrl)
-
-            Surface(modifier = Modifier.padding(0.dp),
-                shape = CircleShape,
-                color = Color(0xFFFFC400)) {
-                Text(weather.weather[0].description,
-                    modifier = Modifier.padding(4.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-
-            Text(buildAnnotatedString {
-                withStyle(style= SpanStyle(
-                    color = Color.Blue.copy(alpha = 0.7f),
-                    fontWeight = FontWeight.SemiBold)){
-                    append(formatDecimals(weather.temp.max) +"°")
-                }
-                withStyle(style = SpanStyle(
-                    color = Color.Gray)){
-                    append(formatDecimals(weather.temp.min)+"°")
-                }
-            })
-        }
-    }
-}
-
-@Composable
-fun SunsetSunRiseNow(weather: WeatherItem) {
-    Row(Modifier.fillMaxWidth()
-        .padding(top = 14.dp, bottom = 5.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-        Row() {
-            Image(painter = painterResource(id = R.drawable.sun),
-                contentDescription = "sunrise",
-                modifier = Modifier.size(25.dp))
-            Text(formatDateTime(weather.sunrise),
-                style = MaterialTheme.typography.bodyLarge
-                )
-        }
-        Row() {
-            Image(painter = painterResource(id = R.drawable.night),
-                contentDescription = "sunset",
-                modifier = Modifier.size(25.dp))
-            Text(text= formatDateTime(weather.sunset),
-                style = MaterialTheme.typography.bodyLarge
-
-            )
-        }
-    }
-}
-
-@Composable
-fun HumidityWindPressureRow(weather: WeatherItem) {
-    Row(modifier = Modifier.padding(12.dp)
-        .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-        Row(modifier = Modifier.padding(4.dp)) {
-            Icon(painter = painterResource(id = R.drawable.humidity),
-                contentDescription = "humidity icon",
-                modifier = Modifier.size(20.dp))
-            Text("${weather.humidity}%",
-                style = MaterialTheme.typography.labelLarge)
-        }
-
-        Row(modifier = Modifier.padding(4.dp)) {
-            Icon(painter = painterResource(id = R.drawable.pressure),
-                contentDescription = "pressure icon",
-                modifier = Modifier.size(24.dp))
-            Text("${weather.pressure} psi")
-        }
-
-        Row(modifier = Modifier.padding(4.dp)) {
-            Icon(painter = painterResource(id = R.drawable.windrapid),
-                contentDescription = "Wind icon",
-                modifier = Modifier.size(24.dp))
-            Text("${weather.humidity} mph")
-        }
-
-    }
-}
-
-@Composable
-fun WeatherStateImage(imageUrl: String) {
-    val painter = rememberAsyncImagePainter(
-        model = imageUrl
-    )
-    Image(
-        painter = painter,
-        contentDescription = "Icon Image",
-        modifier = Modifier.size(100.dp),
-    )
-}
-
-
