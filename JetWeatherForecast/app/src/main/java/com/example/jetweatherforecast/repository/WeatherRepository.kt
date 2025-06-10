@@ -9,6 +9,7 @@ import retrofit2.http.Query
 import javax.inject.Inject
 
 class WeatherRepository @Inject constructor(private val api : WeatherApi) {
+
     suspend fun getWather(cityQuery: String): DataOrException<Weather,Boolean,Exception>{
         val response = try{
         api.getWeather(query = cityQuery)

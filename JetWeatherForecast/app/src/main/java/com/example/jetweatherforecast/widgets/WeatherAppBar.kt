@@ -27,13 +27,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -43,9 +41,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.room.util.TableInfo
+import com.example.jetweatherforecast.model.Favorite
 import com.example.jetweatherforecast.navigation.WeatherScreens
+import com.example.jetweatherforecast.screens.favourites.FavoriteViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +58,7 @@ fun WeatherAppBar(
     elevation : Dp = 0.dp,
     navController: NavController,
     onAddActionClicked: () -> Unit = {},
+    favoriteViewModel: FavoriteViewModel = hiltViewModel(),
     onButtonClicked: () -> Unit = {}){
 
     val showDialog = remember {
@@ -108,6 +110,20 @@ fun WeatherAppBar(
                         onButtonClicked.invoke()
                     }
                     )
+            }
+            if (isMainScreen){
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = "Favorite Icon",
+                    modifier = Modifier.scale(0.9f)
+                        .clickable {
+                            val dataList = title.split(",")
+                        favoriteViewModel
+                            .insertFavorite(Favorite(
+                                city = dataList[0],     //city name
+                                country = dataList[1],  //country code
+                                ))
+                    }, tint = Color.Red.copy(alpha = 0.6f))
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

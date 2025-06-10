@@ -125,7 +125,7 @@ fun MainContent(data: Weather) {
                     fontStyle = FontStyle.Italic)
             }
         }
-        HumidityWindPressureRow(weather=weatherItem)
+        HumidityWindPressureRow(weather = weatherItem)
 
         HorizontalDivider(color = MaterialTheme.colorScheme.primary)
 
