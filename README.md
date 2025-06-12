@@ -31,6 +31,8 @@ More the come
   </tr>
     <tr>
       <td><img src="screenshots/13.png" width="250" /></td>
+      <td><img src="screenshots/14.png" width="250" /></td>
+      <td><img src="screenshots/15.png" width="250" /></td>
    </tr>
 </table>
 
