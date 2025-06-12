@@ -4,9 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.jetweatherforecast.data.WeatherDao
 import com.example.jetweatherforecast.data.WeatherDatabase
-import com.example.jetweatherforecast.model.WeatherObject
 import com.example.jetweatherforecast.networks.WeatherApi
-import com.example.jetweatherforecast.repository.WeatherRepository
 import com.example.jetweatherforecast.utils.Constants
 import dagger.Module
 import dagger.Provides

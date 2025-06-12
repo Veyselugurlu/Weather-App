@@ -3,7 +3,6 @@ package com.example.jetweatherforecast.screens.favourites
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.jetweatherforecast.model.City
 import com.example.jetweatherforecast.model.Favorite
 import com.example.jetweatherforecast.repository.WeatherDbRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
